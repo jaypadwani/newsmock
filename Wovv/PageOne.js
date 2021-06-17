@@ -7,7 +7,7 @@ export default class PageOne extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      datasource: [],
+      datasource: '',
       datasource_org: [],
       input: '',
       page: 0,
@@ -15,79 +15,36 @@ export default class PageOne extends Component {
   }
 
   componentDidMount() {
-    this.getData();
-    setInterval(() => this.getData(), 10000);
+    
+     this.getData();
+    // setInterval(() => this.getData(), 10000);
   }
 
-  async getData() {
-    fetch('https://hn.algolia.com/api/v1/search_by_date?tags=story&page=0')
+   getData() {
+    fetch('https://jsonplaceholder.typicode.com/users')
       .then((response) => response.json())
       .then((responseJson) => {
+        console.log('data====',responseJson)
         this.setState({
-          datasource: responseJson.hits,
-          datasource_org: responseJson.hits,
+          datasource: responseJson,
+          datasource_org: responseJson,
         });
+        console.log('data        ====',this.state.datasource)
+        console.log('data  datasource_org====',this.state.datasource_org)
+
       })
       .catch((error) => console.log(error));
   }
 
-  addPage() {
-    const {page} = this.state;
-    console.log('page', page);
-    this.setState({page: this.state.page + 1});
-
-    fetch(
-      `https://hn.algolia.com/api/v1/search_by_date?tags=story&page=${page}`,
-    )
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          datasource: [...this.state.datasource, ...responseJson.hits],
-          datasource_org: [...this.state.datasource, ...responseJson.hits],
-        });
-      })
-      .catch((error) => console.log(error));
-  }
-
-  sortTitle() {
-    var sorted = this.state.datasource;
-    sorted.sort((a, b) => (a.title > b.title ? 1 : -1));
-    console.log('dtatataatata', JSON.stringify(sorted));
-    this.setState({
-      datasource: sorted,
-    });
-  }
-
-  sortCreated() {
-    var sorted = this.state.datasource;
-    sorted.sort((a, b) => (a.created_at > b.created_at ? 1 : -1));
-    console.log('dtatataatata', JSON.stringify(sorted));
-    this.setState({
-      datasource: sorted,
-    });
-  }
-
-  searching() {
-    const {input} = this.state;
-    //alert(input);
-
-    var result = this.state.datasource_org.filter((ele) => {
-      return (
-        ele.author.toLowerCase().includes(input.toLowerCase()) ||
-        ele.title.toLowerCase().includes(input.toLowerCase()) ||
-        ele.url.toLowerCase().includes(input.toLowerCase())
-      );
-    });
-    //  console.log(result);
-    this.setState({
-      datasource: result,
-    });
-  }
-
-  renderItem(data) {
+  renderItem(item) {
+    console.log('item',item.item.address.city)
     return (
       <View style={{margin: 15}}>
-        <TouchableOpacity
+                <Text>Name :- {item.item.name}</Text>
+        <Text>UserName :- {item.item.username}</Text>
+        <Text>Phone :- {item.item.phone}</Text>
+        <Text>Company Name :- {item.item.company.name}</Text>
+        {/* <TouchableOpacity
           style={{borderColor: 'black', borderWidth: 1, padding: 10}}
           onPress={() =>
             this.props.navigation.navigate('PageTwo', {
@@ -102,34 +59,26 @@ export default class PageOne extends Component {
             Created_at :{data.item.created_at}
           </Text>
           <Text style={{alignSelf: 'center'}}>url :{data.item.url}</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     );
   }
 
   render() {
     return (
-      <View>
+      <View style={{flex:1,backgroundColor:'white'}}>
         <TextInput
           placeholder="Search by title/url/author"
           onChangeText={(input) => this.setState({input})}
         />
-        <Button title="Search" onPress={() => this.searching()}></Button>
-
-        <Button title="Sort by Title" onPress={() => this.sortTitle()}></Button>
-
-        <Button
-          title="Sort by Created at"
-          onPress={() => this.sortCreated()}></Button>
+ 
 
         <FlatList
           data={this.state.datasource}
           renderItem={(item) => this.renderItem(item)}
           keyExtractor={(item) => item.id}
-          onEndReached={() => {
-            this.addPage();
-          }}
-          onEndReachedThreshold={0.3}
+
+          //onEndReachedThreshold={0.3}
         />
       </View>
     );
